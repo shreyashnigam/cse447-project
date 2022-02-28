@@ -25,10 +25,9 @@ class SymbolIndexer:
     _size: int
 
     def _add_symbol(self, symbol: str):
-        if symbol not in self._known_symbol_to_index and not symbol.isspace():
-            self._known_symbol_to_index[symbol] = self._size
-            self._index_to_known_symbol[self._size] = symbol
-            self._size += 1
+        self._known_symbol_to_index[symbol] = self._size
+        self._index_to_known_symbol[self._size] = symbol
+        self._size += 1
 
     def _add_unknown(self):
         self._unknown_idx = self._size
@@ -52,7 +51,17 @@ class SymbolIndexer:
     def to_symbol(self, index: int) -> Optional[str]:
         return self._index_to_known_symbol[index] if index in self._index_to_known_symbol else None
 
+    @classmethod
+    def spanish(cls):
+        return cls([s for s in (string.ascii_letters + "0123456789" + "áéíóúñÁÉÍÓÚÑ¡¿üÜ" + ",.!? ")])
+
+    @classmethod
+    def english(cls):
+        return cls([s for s in (string.ascii_letters + "0123456789" + ",.!? ")])
+
 if __name__ == "__main__":
-    indexer = SymbolIndexer([s for s in "abcdefghijklmnopqrstuvwxyz"])
-    print(indexer.to_index("a"))
-    print(indexer.to_index("z"))
+    spanish = SymbolIndexer.spanish()
+    english = SymbolIndexer.english()
+
+    print(spanish._known_symbol_to_index)
+    print(english._known_symbol_to_index)
