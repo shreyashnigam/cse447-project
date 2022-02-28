@@ -52,16 +52,23 @@ class SymbolIndexer:
         return self._index_to_known_symbol[index] if index in self._index_to_known_symbol else None
 
     @classmethod
+    def english(cls):
+        return cls([s for s in (string.ascii_letters + "0123456789" + ",.!? ")])
+
+    @classmethod
     def spanish(cls):
         return cls([s for s in (string.ascii_letters + "0123456789" + "áéíóúñÁÉÍÓÚÑ¡¿üÜ" + ",.!? ")])
 
     @classmethod
-    def english(cls):
-        return cls([s for s in (string.ascii_letters + "0123456789" + ",.!? ")])
+    def russian(cls):
+        return cls([s for s in ("АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯаэыуояеёюибвгджзклмнпрстфхцчшщйьъ" + "0123456789" + ",.!? ")])
+
 
 if __name__ == "__main__":
     spanish = SymbolIndexer.spanish()
     english = SymbolIndexer.english()
+    russian = SymbolIndexer.russian()
 
     print(spanish._known_symbol_to_index)
     print(english._known_symbol_to_index)
+    print(russian._known_symbol_to_index)
