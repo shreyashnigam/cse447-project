@@ -12,10 +12,8 @@ import text_dataset
 if __name__ == "__main__":
     sequence_length = 64
     embed_dim = 192
-    train_path = Path("..") / Path("self_attention_model") / Path("data") / Path("train2.txt")
-    with open(train_path) as train_data:
-        indexer = data_util.SymbolIndexer(train_data.read())
-        print(indexer.size())
+    train_path = "your/train/path"
+    indexer = data_util.SymbolIndexer.spanish()
 
     dataset = text_dataset.TextDataset(sequence_length, train_path, indexer=indexer)
     function = model.BasicModel(sequence_length, indexer, embed_dim)
