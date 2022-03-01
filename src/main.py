@@ -19,7 +19,7 @@ if __name__ == "__main__":
     #     print(indexer.size())
     #     print(indexer._known_symbol_to_index)
     train_path = "your/train/path"
-    indexer = data_util.SymbolIndexer.spanish()
+    indexer = data_util.SymbolIndexer.russianandspanish()
 
     dataset = text_dataset.TextDataset(sequence_length, train_path, indexer=indexer)
     function = model.BasicModel(sequence_length, indexer, embed_dim)

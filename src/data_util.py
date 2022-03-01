@@ -64,11 +64,18 @@ class SymbolIndexer:
         return cls([s for s in ("АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯаэыуояеёюибвгджзклмнпрстфхцчшщйьъ" + "0123456789" + ",.!? ")])
 
 
+    @classmethod
+    def russianandspanish(cls):
+        return cls([s for s in ("АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯаэыуояеёюибвгджзклмнпрстфхцчшщйьъ" + "0123456789" + ",.!? " + string.ascii_letters + "0123456789" + "áéíóúñÁÉÍÓÚÑ¡¿üÜ")])
+
 if __name__ == "__main__":
     spanish = SymbolIndexer.spanish()
     english = SymbolIndexer.english()
     russian = SymbolIndexer.russian()
+    russianandspanish = SymbolIndexer.russianandspanish()
 
     print(spanish._known_symbol_to_index)
     print(english._known_symbol_to_index)
     print(russian._known_symbol_to_index)
+    print(russianandspanish._known_symbol_to_index)
+
