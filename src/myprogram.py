@@ -10,6 +10,7 @@ from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 import data_util
 import model
 import lightning_wrapper
+from langid import set_languages, classify
 
 
 @dataclass
@@ -25,14 +26,27 @@ class MyModelConfig:
 
 
 class MyModel:
-    def __init__(self, config: MyModelConfig):
-        self.indexer = data_util.SymbolIndexer()
-        self.config = config
-        temp = model.BasicModel(config.sequence_length,
-                                self.indexer, config.embed_dim)
-        temp = lightning_wrapper.LightningWrapper.load_from_checkpoint(
-            config.chkpt_path, map_location=config.device, f=temp)
-        self.my_model = temp.f
+    def __init__(self):
+        english_model = model.BasicModel(CONFIG_ENGLISH.sequence_length,
+                                data_util.SymbolIndexer.english(), CONFIG_ENGLISH.embed_dim)
+        english_model = lightning_wrapper.LightningWrapper.load_from_checkpoint(
+            CONFIG_ENGLISH.chkpt_path, map_location=CONFIG_ENGLISH.device, f=english_model)
+
+        spanish_model = model.BasicModel(CONFIG_SPANISH.sequence_length,
+                                data_util.SymbolIndexer.spanish(), CONFIG_SPANISH.embed_dim)
+        spanish_model = lightning_wrapper.LightningWrapper.load_from_checkpoint(
+            CONFIG_SPANISH.chkpt_path, map_location=CONFIG_SPANISH.device, f=spanish_model)
+
+        russian_model = model.BasicModel(CONFIG_RUSSIAN.sequence_length,
+                                data_util.SymbolIndexer.russian(), CONFIG_RUSSIAN.embed_dim)
+        russian_model = lightning_wrapper.LightningWrapper.load_from_checkpoint(
+            CONFIG_RUSSIAN.chkpt_path, map_location=CONFIG_RUSSIAN.device, f=russian_model)
+
+
+        self.my_models = {'en': english_model.f, 'es': spanish_model.f, 'ru': russian_model.f}
+        self.configs = {'en': CONFIG_ENGLISH, 'es': CONFIG_SPANISH, 'ru': CONFIG_RUSSIAN}
+        # set_languages(['en', 'es', 'ru'])
+
 
     @classmethod
     def load_test_data(cls, fname):
@@ -47,15 +61,19 @@ class MyModel:
                 f.write(f"{p}\n")
 
     def prediction_from_line(self, line: str, k: int) -> str:
-        if len(line) >= self.config.sequence_length:
-            line = line[-self.config.sequence_length:]
-        else:
-            line = self.config.dummy_prompt[-(
-                self.config.sequence_length - len(line)):] + line
-        x = torch.ByteTensor([self.indexer.to_index(symbol)
+        lang_class = classify(line)   # returns a tuple of language id and -log prob
+        config = self.configs[lang_class[0]]
+        if len(line) >= config.sequence_length:
+            line = line[-config.sequence_length:]
+        else:    
+            line = config.dummy_prompt[-(
+                config.sequence_length - len(line)):] + line
+        
+        model = self.my_models[lang_class[0]]
+        x = torch.ByteTensor([model.embed.indexer.to_index(symbol)
                               for symbol in line]).unsqueeze(0)
-        y_pred = self.my_model(x).squeeze(0)[-1]
-        result = self.my_model.embed.interpret(y_pred, k=k+1)
+        y_pred = model(x).squeeze(0)[-1]
+        result = model.embed.interpret(y_pred, k=k+1)
         result = [c for c in result if c is not None][:k]
         return "" .join(result)
 
@@ -78,9 +96,25 @@ if __name__ == "__main__":
         "--test_output", help="path to write test predictions", default="pred.txt")
     args = parser.parse_args()
 
-    CONFIG = MyModelConfig(
-        chkpt_path="work/epoch=2-step=1617919.ckpt",
+    CONFIG_ENGLISH = MyModelConfig(
+        chkpt_path="work/english.ckpt",
         dummy_prompt="in other words, living an eternity of just about anything is now more terrifying to me than death. ",
+        device="cpu",
+        sequence_length=64,
+        embed_dim=192,
+    )
+
+    CONFIG_SPANISH = MyModelConfig(
+        chkpt_path="work/spanish.ckpt",
+        dummy_prompt="Tomebamba también conocido como Tumipampa fue el centro administrativo del norte del Imperio inca, antes de la conquista Inca era el asentamiento cañari de Guapondelig. ",
+        device="cpu",
+        sequence_length=64,
+        embed_dim=192,
+    )
+
+    CONFIG_RUSSIAN= MyModelConfig(
+        chkpt_path="work/russian.ckpt",
+        dummy_prompt="старейшее из существующих семейство с территории Южных Нидерландов, сначала баронское, затем княжеское. Упоминается на страницах источников с XII века. ",
         device="cpu",
         sequence_length=64,
         embed_dim=192,
@@ -91,7 +125,8 @@ if __name__ == "__main__":
             print("Making working directory {}".format(args.work_dir))
             os.makedirs(args.work_dir)
     elif args.mode == "test":
-        model = MyModel(CONFIG)
+        set_languages(['en', 'es', 'ru'])
+        model = MyModel()
         print("Loading test data from {}".format(args.test_data))
         test_data = MyModel.load_test_data(args.test_data)
         print("Making predictions")
@@ -101,7 +136,8 @@ if __name__ == "__main__":
             len(test_data), len(pred))
         model.write_pred(pred, args.test_output)
     elif args.mode == "interactive":
-        model = MyModel(CONFIG)
+        set_languages(['en', 'es', 'ru'])
+        model = MyModel()
         user_prompt = ""
         while True:
             print(model.prediction_from_line(user_prompt, k=3))
