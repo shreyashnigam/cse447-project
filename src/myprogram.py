@@ -13,6 +13,8 @@ import lightning_wrapper
 from langid import set_languages, classify
 
 
+DEVICE = 'cpu'
+
 @dataclass
 class MyModelConfig:
     dummy_prompt: str
@@ -42,10 +44,14 @@ class MyModel:
         russian_model = lightning_wrapper.LightningWrapper.load_from_checkpoint(
             CONFIG_RUSSIAN.chkpt_path, map_location=CONFIG_RUSSIAN.device, f=russian_model)
 
+        japanese_model = model.BasicModel(CONFIG_JAPANESE.sequence_length,
+                                data_util.SymbolIndexer.japanese(), CONFIG_JAPANESE.embed_dim)
+        japanese_model = lightning_wrapper.LightningWrapper.load_from_checkpoint(
+            CONFIG_JAPANESE.chkpt_path, map_location=CONFIG_JAPANESE.device, f=japanese_model)
 
-        self.my_models = {'en': english_model.f, 'es': spanish_model.f, 'ru': russian_model.f}
-        self.configs = {'en': CONFIG_ENGLISH, 'es': CONFIG_SPANISH, 'ru': CONFIG_RUSSIAN}
-        # set_languages(['en', 'es', 'ru'])
+
+        self.my_models = {'en': english_model.f, 'es': spanish_model.f, 'ru': russian_model.f, 'ja': japanese_model.f}
+        self.configs = {'en': CONFIG_ENGLISH, 'es': CONFIG_SPANISH, 'ru': CONFIG_RUSSIAN, 'ja': CONFIG_JAPANESE}
 
 
     @classmethod
@@ -99,7 +105,7 @@ if __name__ == "__main__":
     CONFIG_ENGLISH = MyModelConfig(
         chkpt_path="work/english.ckpt",
         dummy_prompt="in other words, living an eternity of just about anything is now more terrifying to me than death. ",
-        device="cpu",
+        device=DEVICE,
         sequence_length=64,
         embed_dim=192,
     )
@@ -107,15 +113,23 @@ if __name__ == "__main__":
     CONFIG_SPANISH = MyModelConfig(
         chkpt_path="work/spanish.ckpt",
         dummy_prompt="Tomebamba también conocido como Tumipampa fue el centro administrativo del norte del Imperio inca, antes de la conquista Inca era el asentamiento cañari de Guapondelig. ",
-        device="cpu",
+        device=DEVICE,
         sequence_length=64,
         embed_dim=192,
     )
 
-    CONFIG_RUSSIAN= MyModelConfig(
+    CONFIG_RUSSIAN = MyModelConfig(
         chkpt_path="work/russian.ckpt",
         dummy_prompt="старейшее из существующих семейство с территории Южных Нидерландов, сначала баронское, затем княжеское. Упоминается на страницах источников с XII века. ",
-        device="cpu",
+        device=DEVICE,
+        sequence_length=64,
+        embed_dim=192,
+    )
+
+    CONFIG_JAPANESE = MyModelConfig(
+        chkpt_path="work/japanese.ckpt",
+        dummy_prompt="ヒトにおいて19遺伝子存在するアルデヒドデヒドロゲナーゼ遺伝子の1つであり、コードしているALDH2タンパク質はヒトの肝臓を中心に様々な組織、細胞においてエタノールの代謝産物であるアセトアルデヒドを含む反応性アルデヒドの酸化および無毒化に重要な働きをしている酵素である",
+        device=DEVICE,
         sequence_length=64,
         embed_dim=192,
     )
@@ -125,7 +139,7 @@ if __name__ == "__main__":
             print("Making working directory {}".format(args.work_dir))
             os.makedirs(args.work_dir)
     elif args.mode == "test":
-        set_languages(['en', 'es', 'ru'])
+        set_languages(['en', 'es', 'ru', 'ja'])
         model = MyModel()
         print("Loading test data from {}".format(args.test_data))
         test_data = MyModel.load_test_data(args.test_data)
@@ -136,7 +150,7 @@ if __name__ == "__main__":
             len(test_data), len(pred))
         model.write_pred(pred, args.test_output)
     elif args.mode == "interactive":
-        set_languages(['en', 'es', 'ru'])
+        set_languages(['en', 'es', 'ru', 'ja'])
         model = MyModel()
         user_prompt = ""
         while True:
