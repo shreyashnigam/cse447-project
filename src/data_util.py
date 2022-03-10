@@ -67,6 +67,14 @@ class SymbolIndexer:
     def japanese(cls):
         return cls([s for s in ("ーぁあぃいぅうぇえぉおかがきぎくぐけげこごさざしじすずせぜそぞただちぢっつづてでとどなにぬねのはばぱひびぴふぶぷへべぺほぼぽまみむめもゃやゅゆょよらりるれろゎわゐゑをんァアィイゥウェエォオカガキギクグケゲコゴサザシジスズセゼソゾタダチヂッツヅテデトドナニヌネノハバパヒビピフブプヘベペホボポマミムメモャヤュユョヨラリルレロヮワヰヱヲンヴヵヶ゛゜" + + "0123456789" + ",.!?")])
 
+    @classmethod
+    def chinese(cls):
+        return cls([s for s in ("的一是不了人我在有他这为之大来以个中上们到说国和地也子时道出而要于就下得可你年生自会那后能对着事其里所去行过家十用发天如然作方成者多日都三小军二无同么经法当起与好看学进种将还分此心前面又定见只主没公从" + "一二三四五六七八九十" + ",.!? ")])
+
+    @classmethod
+    def french(cls):
+        return cls([s for s in (string.ascii_letters + "ùûüÿàâæçéèêëïîôœÚÛÜŸÁÂÆÇÉÈÊËÏÎÔŒ" + "0123456789" + ",.!? ")])
+
 if __name__ == "__main__":
     spanish = SymbolIndexer.spanish()
     english = SymbolIndexer.english()
