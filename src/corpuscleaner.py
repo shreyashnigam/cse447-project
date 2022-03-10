@@ -5,7 +5,6 @@ import re
 import argparse
 
 def corpuscleaner(original_file_path, new_file_path):
-	number = 0
 	with open(original_file_path, "r+") as original_file, open(new_file_path, "w+") as clean_file:
 		for line in original_file:
 			clean = re.sub("[\(\[\<].*?[\>\)\]]", "", line) # Delete anything between angle brackets, brackets, and parenthesis

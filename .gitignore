@@ -4,5 +4,5 @@ output/
 submit/
 submit.zip
 src/data/
-self_attention_model/data/*
+data
 .DS*
