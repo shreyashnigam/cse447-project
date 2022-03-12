@@ -65,7 +65,7 @@ class SymbolIndexer:
     
     @classmethod
     def japanese(cls):
-        return cls([s for s in ("ーぁあぃいぅうぇえぉおかがきぎくぐけげこごさざしじすずせぜそぞただちぢっつづてでとどなにぬねのはばぱひびぴふぶぷへべぺほぼぽまみむめもゃやゅゆょよらりるれろゎわゐゑをんァアィイゥウェエォオカガキギクグケゲコゴサザシジスズセゼソゾタダチヂッツヅテデトドナニヌネノハバパヒビピフブプヘベペホボポマミムメモャヤュユョヨラリルレロヮワヰヱヲンヴヵヶ゛゜" + + "0123456789" + ",.!?")])
+        return cls([s for s in ("ーぁあぃいぅうぇえぉおかがきぎくぐけげこごさざしじすずせぜそぞただちぢっつづてでとどなにぬねのはばぱひびぴふぶぷへべぺほぼぽまみむめもゃやゅゆょよらりるれろゎわゐゑをんァアィイゥウェエォオカガキギクグケゲコゴサザシジスズセゼソゾタダチヂッツヅテデトドナニヌネノハバパヒビピフブプヘベペホボポマミムメモャヤュユョヨラリルレロヮワヰヱヲンヴヵヶ゛゜" + "0123456789" + ",.!?")])
 
     @classmethod
     def chinese(cls):
@@ -74,6 +74,10 @@ class SymbolIndexer:
     @classmethod
     def french(cls):
         return cls([s for s in (string.ascii_letters + "ùûüÿàâæçéèêëïîôœÚÛÜŸÁÂÆÇÉÈÊËÏÎÔŒ" + "0123456789" + ",.!? ")])
+    
+    @classmethod
+    def norwegian(cls):
+        return cls([s for s in ("'ÅÆØåæøABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'" + "0123456789" + ",.!? ")])
 
 if __name__ == "__main__":
     spanish = SymbolIndexer.spanish()

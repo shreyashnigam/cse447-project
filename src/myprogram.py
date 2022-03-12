@@ -48,10 +48,15 @@ class MyModel:
                                 data_util.SymbolIndexer.japanese(), CONFIG_JAPANESE.embed_dim)
         japanese_model = lightning_wrapper.LightningWrapper.load_from_checkpoint(
             CONFIG_JAPANESE.chkpt_path, map_location=CONFIG_JAPANESE.device, f=japanese_model)
+        
+        norwegian_model = model.BasicModel(CONFIG_NORWEGIAN.sequence_length,
+                                           data_util.SymbolIndexer.norwegian(), CONFIG_NORWEGIAN.embed_dim)
+        norwegian_model = lightning_wrapper.LightningWrapper.load_from_checkpoint(
+            CONFIG_NORWEGIAN.chkpt_path, map_location=CONFIG_NORWEGIAN.device, f=norwegian_model)
 
 
-        self.my_models = {'en': english_model.f, 'es': spanish_model.f, 'ru': russian_model.f, 'ja': japanese_model.f}
-        self.configs = {'en': CONFIG_ENGLISH, 'es': CONFIG_SPANISH, 'ru': CONFIG_RUSSIAN, 'ja': CONFIG_JAPANESE}
+        self.my_models = {'en': english_model.f, 'es': spanish_model.f, 'ru': russian_model.f, 'ja': japanese_model.f, 'no': norwegian_model.f}
+        self.configs = {'en': CONFIG_ENGLISH, 'es': CONFIG_SPANISH, 'ru': CONFIG_RUSSIAN, 'ja': CONFIG_JAPANESE, 'no': CONFIG_NORWEGIAN}
 
 
     @classmethod
@@ -134,12 +139,20 @@ if __name__ == "__main__":
         embed_dim=192,
     )
 
+    CONFIG_NORWEGIAN = MyModelConfig(
+        chkpt_path="work/norwegian.ckpt",
+        dummy_prompt="ar ikke noe sånn vondt ment det ei nlle skulle rette opp så du en feil så skulle n kke sant a det internt og for at det skulle være bra når det ga ja da syns vi var veldig e det er veldig e fornø",
+        device=DEVICE,
+        sequence_length=64,
+        embed_dim=192,
+    )
+
     if args.mode == "train":
         if not os.path.isdir(args.work_dir):
             print("Making working directory {}".format(args.work_dir))
             os.makedirs(args.work_dir)
     elif args.mode == "test":
-        set_languages(['en', 'es', 'ru', 'ja'])
+        set_languages(['en', 'es', 'ru', 'ja', 'no'])
         model = MyModel()
         print("Loading test data from {}".format(args.test_data))
         test_data = MyModel.load_test_data(args.test_data)
@@ -150,7 +163,7 @@ if __name__ == "__main__":
             len(test_data), len(pred))
         model.write_pred(pred, args.test_output)
     elif args.mode == "interactive":
-        set_languages(['en', 'es', 'ru', 'ja'])
+        set_languages(['en', 'es', 'ru', 'ja', 'no'])
         model = MyModel()
         user_prompt = ""
         while True:

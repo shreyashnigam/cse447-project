@@ -5,8 +5,11 @@ import re
 import argparse
 
 def corpuscleaner(original_file_path, new_file_path):
+	print("MAKE SURE TO COMMENT THE ONLY FOR NORWEGIAN LINES OUT IF NOT CLEANING NORWEGIAN!!!!!!!!!!!")
 	with open(original_file_path, "r+") as original_file, open(new_file_path, "w+") as clean_file:
 		for line in original_file:
+			line = line.replace('*', '') # ONLY FOR NORWEGIAN
+			line = line.replace('#', '') # ONLY FOR NORWEGIAN
 			clean = re.sub("[\(\[\<].*?[\>\)\]]", "", line) # Delete anything between angle brackets, brackets, and parenthesis
 			
 			# get rid of weird spaces (\u200b)
