@@ -54,9 +54,14 @@ class MyModel:
         norwegian_model = lightning_wrapper.LightningWrapper.load_from_checkpoint(
             CONFIG_NORWEGIAN.chkpt_path, map_location=CONFIG_NORWEGIAN.device, f=norwegian_model)
 
+        chinese_model = model.BasicModel(CONFIG_CHINESE.sequence_length,
+                                           data_util.SymbolIndexer.chinese(), CONFIG_CHINESE.embed_dim)
+        chinese_model = lightning_wrapper.LightningWrapper.load_from_checkpoint(
+            CONFIG_CHINESE.chkpt_path, map_location=CONFIG_CHINESE.device, f=chinese_model)
 
-        self.my_models = {'en': english_model.f, 'es': spanish_model.f, 'ru': russian_model.f, 'ja': japanese_model.f, 'no': norwegian_model.f}
-        self.configs = {'en': CONFIG_ENGLISH, 'es': CONFIG_SPANISH, 'ru': CONFIG_RUSSIAN, 'ja': CONFIG_JAPANESE, 'no': CONFIG_NORWEGIAN}
+
+        self.my_models = {'en': english_model.f, 'es': spanish_model.f, 'ru': russian_model.f, 'ja': japanese_model.f, 'no': norwegian_model.f, 'zh': chinese_model.f}
+        self.configs = {'en': CONFIG_ENGLISH, 'es': CONFIG_SPANISH, 'ru': CONFIG_RUSSIAN, 'ja': CONFIG_JAPANESE, 'no': CONFIG_NORWEGIAN, 'zh': CONFIG_CHINESE}
 
 
     @classmethod
@@ -147,12 +152,20 @@ if __name__ == "__main__":
         embed_dim=192,
     )
 
+    CONFIG_CHINESE = MyModelConfig(
+        chkpt_path="work/chinese.ckpt",
+        dummy_prompt="是一种较弱的雌性甾体性激素，是三种主要的内源性雌激素之一，另外两种为雌二醇和雌三醇。雌酮等雌激素的生物合成从膽固醇开始，大部分由生殖腺分泌，少部分为脂肪組織对来自腎上腺的雄激素的转化。相对于雌二醇而言，雌酮和雌三醇的活性都很小。雌酮可转化为雌二醇，是主要的雌二醇代謝前体。 孩童+青春期 出生1-14 天：新生兒的雌酮水平在出生時非常高，但會在幾天內降至青春期前水平。 男性 #青春期開始",
+        device=DEVICE,
+        sequence_length=64,
+        embed_dim=192,
+    )
+
     if args.mode == "train":
         if not os.path.isdir(args.work_dir):
             print("Making working directory {}".format(args.work_dir))
             os.makedirs(args.work_dir)
     elif args.mode == "test":
-        set_languages(['en', 'es', 'ru', 'ja', 'no'])
+        set_languages(['en', 'es', 'ru', 'ja', 'no', 'zh'])
         model = MyModel()
         print("Loading test data from {}".format(args.test_data))
         test_data = MyModel.load_test_data(args.test_data)
@@ -163,7 +176,7 @@ if __name__ == "__main__":
             len(test_data), len(pred))
         model.write_pred(pred, args.test_output)
     elif args.mode == "interactive":
-        set_languages(['en', 'es', 'ru', 'ja', 'no'])
+        set_languages(['en', 'es', 'ru', 'ja', 'no', 'zh'])
         model = MyModel()
         user_prompt = ""
         while True:
