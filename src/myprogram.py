@@ -59,9 +59,19 @@ class MyModel:
         chinese_model = lightning_wrapper.LightningWrapper.load_from_checkpoint(
             CONFIG_CHINESE.chkpt_path, map_location=CONFIG_CHINESE.device, f=chinese_model)
 
+        hindi_model = model.BasicModel(CONFIG_HINDI.sequence_length,
+                                           data_util.SymbolIndexer.hindi(), CONFIG_HINDI.embed_dim)
+        hindi_model = lightning_wrapper.LightningWrapper.load_from_checkpoint(
+            CONFIG_HINDI.chkpt_path, map_location=CONFIG_HINDI.device, f=hindi_model)
 
-        self.my_models = {'en': english_model.f, 'es': spanish_model.f, 'ru': russian_model.f, 'ja': japanese_model.f, 'no': norwegian_model.f, 'zh': chinese_model.f}
-        self.configs = {'en': CONFIG_ENGLISH, 'es': CONFIG_SPANISH, 'ru': CONFIG_RUSSIAN, 'ja': CONFIG_JAPANESE, 'no': CONFIG_NORWEGIAN, 'zh': CONFIG_CHINESE}
+        french_model = model.BasicModel(CONFIG_FRENCH.sequence_length,
+                                           data_util.SymbolIndexer.french(), CONFIG_FRENCH.embed_dim)
+        french_model = lightning_wrapper.LightningWrapper.load_from_checkpoint(
+            CONFIG_FRENCH.chkpt_path, map_location=CONFIG_FRENCH.device, f=french_model)
+
+
+        self.my_models = {'en': english_model.f, 'es': spanish_model.f, 'ru': russian_model.f, 'ja': japanese_model.f, 'no': norwegian_model.f, 'zh': chinese_model.f, 'hi': hindi_model.f, 'fr': french_model.f}
+        self.configs = {'en': CONFIG_ENGLISH, 'es': CONFIG_SPANISH, 'ru': CONFIG_RUSSIAN, 'ja': CONFIG_JAPANESE, 'no': CONFIG_NORWEGIAN, 'zh': CONFIG_CHINESE, 'hi': CONFIG_HINDI, 'fr': CONFIG_FRENCH}
 
 
     @classmethod
@@ -160,12 +170,28 @@ if __name__ == "__main__":
         embed_dim=192,
     )
 
+    CONFIG_HINDI = MyModelConfig(
+        chkpt_path="work/hindi.ckpt",
+        dummy_prompt="प्रतिशत तक क्षाराभ पाए जाते हैं जिनमें रिसरपिन प्रमुख हैं इसका गुण रूक्ष, रस में तिक्त, विपाक में कटु और इसका प्रभाव निद्राजनक होता है।",
+        device=DEVICE,
+        sequence_length=64,
+        embed_dim=192,
+    )
+
+    CONFIG_FRENCH = MyModelConfig(
+        chkpt_path="work/french.ckpt",
+        dummy_prompt="Cette géométrie change significativement lors de la chélation : Les éthers couronnes peuvent être utilisés au laboratoire comme catalyseurs de transfert de phase, bien qu'il existe de tels catalyseurs moins chers et moins spécifiques. En présence de 18-C-6, le permanganate de potassium se dissout dans le benzène en donnant du benzène violet",
+        device=DEVICE,
+        sequence_length=64,
+        embed_dim=192,
+    )
+
     if args.mode == "train":
         if not os.path.isdir(args.work_dir):
             print("Making working directory {}".format(args.work_dir))
             os.makedirs(args.work_dir)
     elif args.mode == "test":
-        set_languages(['en', 'es', 'ru', 'ja', 'no', 'zh'])
+        set_languages(['en', 'es', 'ru', 'ja', 'no', 'zh', 'hi', 'fr'])
         model = MyModel()
         print("Loading test data from {}".format(args.test_data))
         test_data = MyModel.load_test_data(args.test_data)
@@ -176,7 +202,7 @@ if __name__ == "__main__":
             len(test_data), len(pred))
         model.write_pred(pred, args.test_output)
     elif args.mode == "interactive":
-        set_languages(['en', 'es', 'ru', 'ja', 'no', 'zh'])
+        set_languages(['en', 'es', 'ru', 'ja', 'no', 'zh', 'hi' ,'fr'])
         model = MyModel()
         user_prompt = ""
         while True:
